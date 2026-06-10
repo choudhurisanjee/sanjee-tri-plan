@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Chicago Triathlon 2026 — Training Plan</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+  :root {
+    --lake: #1a6b8a;
+    --asphalt: #1e2022;
+    --concrete: #f0f0ec;
+    --swim-bg: #cce8f4;
+    --swim-border: #1a6b8a;
+    --swim-text: #0d4a63;
+    --bike-bg: #fde9b0;
+    --bike-border: #c47a0a;
+    --bike-text: #7a4c00;
+    --run-bg: #d4edcc;
+    --run-border: #3a8c3f;
+    --run-text: #1f5c24;
+    --brick-bg: #e8d5f7;
+    --brick-border: #7c3aed;
+    --brick-text: #4a1a9e;
+    --rest-bg: #e8e8e4;
+    --rest-border: #aaa;
+    --rest-text: #666;
+    --phase1: #1a6b8a;
+    --phase2: #c47a0a;
+    --phase3: #7c3aed;
+    --phase4: #3a8c3f;
+    --race: #c0392b;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--concrete);
+    color: var(--asphalt);
+    font-size: 14px;
+    line-height: 1.4;
+    overscroll-behavior: none;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--asphalt);
+    color: white;
+    padding: 20px 16px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  header h1 { font-size: 18px; font-weight: 600; }
+  header .sub { font-family: 'DM Mono', monospace; font-size: 10px; color: #aaa; margin-top: 3px; }
+  header .race-badge {
+    background: var(--race);
+    color: white;
+    border-radius: 6px;
+    padding: 6px 12px;
+    text-align: center;
+    font-size: 11px;
+  }
+  header .race-badge strong { display: block; font-size: 20px; font-weight: 700; line-height: 1; }
+
+  /* ── LEGEND ── */
+  .legend {
+    display: flex; gap: 10px; flex-wrap: wrap;
+    padding: 10px 16px;
+    background: white;
+    border-bottom: 1px solid #ddd;
+  }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 500; }
+  .legend-dot { width: 9px; height: 9px; border-radius: 2px; }
+
+  /* ── MAIN ── */
+  .main { padding: 16px 12px 60px; }
+
+  /* ── PHASE BLOCK ── */
+  .phase-block { margin-bottom: 28px; }
+
+  .phase-header {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 10px; padding-bottom: 8px;
+    border-bottom: 2px solid currentColor;
+    flex-wrap: wrap;
+  }
+  .phase-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px; font-weight: 500;
+    letter-spacing: 1px; text-transform: uppercase;
+    padding: 3px 7px; border-radius: 2px; color: white;
+    white-space: nowrap;
+  }
+  .phase-title { font-size: 14px; font-weight: 600; }
+  .phase-desc { font-size: 11px; color: #666; width: 100%; margin-top: 2px; }
+
+  /* ── WEEK TABLE ── */
+  .week-table { width: 100%; border-collapse: separate; border-spacing: 0 7px; }
+
+  .week-table th {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px; font-weight: 500;
+    text-transform: uppercase; letter-spacing: 0.5px;
+    color: #999; padding: 2px 4px;
+    text-align: center;
+  }
+  .week-table th:first-child { text-align: right; width: 52px; }
+
+  .wk-label {
+    text-align: right;
+    padding-right: 8px;
+    vertical-align: middle;
+  }
+  .wk-label .wk-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px; font-weight: 500;
+    color: var(--asphalt); display: block;
+  }
+  .wk-label .wk-dates {
+    font-size: 9px; color: #aaa; display: block; white-space: nowrap;
+  }
+
+  /* ── DAY CELL ── */
+  .day-cell {
+    border-radius: 5px;
+    padding: 7px 5px 6px;
+    text-align: center;
+    cursor: pointer;
+    user-select: none;
+    border-top: 3px solid transparent;
+    transition: opacity 0.15s, transform 0.1s;
+    position: relative;
+    min-width: 38px;
+  }
+  .day-cell:active { opacity: 0.75; transform: scale(0.95); }
+
+  .day-cell.swim   { background: var(--swim-bg);  border-top-color: var(--swim-border); }
+  .day-cell.bike   { background: var(--bike-bg);  border-top-color: var(--bike-border); }
+  .day-cell.run    { background: var(--run-bg);   border-top-color: var(--run-border); }
+  .day-cell.brick  { background: var(--brick-bg); border-top-color: var(--brick-border); }
+  .day-cell.rest   { background: var(--rest-bg);  border-top-color: var(--rest-border); opacity: 0.6; cursor: default; }
+  .day-cell.race-day {
+    background: #fff0ee;
+    border: 2px solid var(--race);
+    border-top: 3px solid var(--race);
+    cursor: pointer;
+  }
+
+  .cell-emoji { font-size: 18px; line-height: 1; display: block; margin-bottom: 3px; }
+  .cell-label {
+    font-size: 9px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.3px;
+    line-height: 1.2;
+  }
+  .day-cell.swim   .cell-label { color: var(--swim-text); }
+  .day-cell.bike   .cell-label { color: var(--bike-text); }
+  .day-cell.run    .cell-label { color: var(--run-text); }
+  .day-cell.brick  .cell-label { color: var(--brick-text); }
+  .day-cell.rest   .cell-label { color: var(--rest-text); }
+  .day-cell.race-day .cell-label { color: var(--race); font-size: 10px; }
+
+  .cell-dist {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px; color: #666;
+    margin-top: 2px; display: block;
+    line-height: 1.2;
+  }
+  .day-cell.rest .cell-dist { display: none; }
+
+  /* milestone dot */
+  .milestone-dot {
+    position: absolute; top: 3px; right: 3px;
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--race);
+  }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.55);
+    z-index: 100;
+    align-items: flex-end;
+    justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: white;
+    border-radius: 16px 16px 0 0;
+    padding: 0 0 40px;
+    width: 100%;
+    max-width: 500px;
+    max-height: 82vh;
+    overflow-y: auto;
+    animation: slideUp 0.22s ease;
+  }
+  @keyframes slideUp {
+    from { transform: translateY(100%); }
+    to   { transform: translateY(0); }
+  }
+
+  .modal-handle {
+    width: 36px; height: 4px;
+    background: #ddd; border-radius: 2px;
+    margin: 12px auto 0;
+  }
+
+  .modal-header {
+    padding: 16px 20px 12px;
+    border-bottom: 1px solid #eee;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .modal-emoji { font-size: 28px; }
+  .modal-title-block {}
+  .modal-type { font-size: 17px; font-weight: 600; }
+  .modal-week { font-size: 12px; color: #888; font-family: 'DM Mono', monospace; }
+
+  .modal-body { padding: 16px 20px; }
+
+  .modal-row {
+    display: flex; justify-content: space-between;
+    padding: 9px 0;
+    border-bottom: 1px solid #f0f0ec;
+    font-size: 14px;
+  }
+  .modal-row:last-child { border-bottom: none; }
+  .modal-row-label { color: #888; font-size: 13px; }
+  .modal-row-val { font-weight: 500; text-align: right; max-width: 60%; }
+
+  .modal-note {
+    margin-top: 12px; padding: 10px 14px;
+    background: #fff8e6; border-left: 3px solid #f0a500;
+    border-radius: 4px; font-size: 13px; color: #664d00;
+  }
+  .modal-milestone {
+    margin-top: 10px; padding: 10px 14px;
+    background: #ffeeed; border-left: 3px solid var(--race);
+    border-radius: 4px; font-size: 13px; color: var(--race); font-weight: 500;
+  }
+
+  .modal-close {
+    display: block; width: calc(100% - 40px); margin: 16px 20px 0;
+    padding: 13px; background: var(--asphalt);
+    color: white; border: none; border-radius: 8px;
+    font-size: 15px; font-weight: 600; cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  /* ── MILESTONES FOOTER ── */
+  .milestones {
+    margin-top: 8px; padding: 14px 16px;
+    background: white; border-radius: 8px;
+    border-left: 4px solid var(--lake);
+  }
+  .milestones h3 {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px; font-weight: 500;
+    text-transform: uppercase; letter-spacing: 1px;
+    color: var(--lake); margin-bottom: 10px;
+  }
+  .milestone-item {
+    font-size: 12px; color: #444;
+    padding: 5px 0; border-bottom: 1px solid #f0f0ec;
+    display: flex; gap: 8px;
+  }
+  .milestone-item:last-child { border-bottom: none; }
+  .milestone-item::before { content: '→'; color: var(--lake); font-weight: 700; flex-shrink: 0; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>Chicago Tri 2026</h1>
+    <div class="sub">Olympic · 1.5k Swim · 40k Bike · 10k Run</div>
+  </div>
+  <div class="race-badge">
+    <strong>Aug 28</strong>
+    Race Day
+  </div>
+</header>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:#1a6b8a"></div>Swim</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#c47a0a"></div>Bike</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#3a8c3f"></div>Run</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#7c3aed"></div>Brick</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#aaa"></div>Rest</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--race)"></div>Milestone</div>
+</div>
+
+<div class="main">
+
+<!-- ═══════════════ PHASE 1 ═══════════════ -->
+<div class="phase-block">
+  <div class="phase-header" style="color:var(--phase1)">
+    <span class="phase-label" style="background:var(--phase1)">Phase 1</span>
+    <span class="phase-title">Base Building</span>
+    <span class="phase-desc">Weeks 1–3 · Jun 15–Jul 5 · Establish structure, fix swim pace, build bike confidence</span>
+  </div>
+  <table class="week-table">
+    <thead><tr>
+      <th></th><th>MON</th><th>TUE</th><th>WED</th><th>THU</th><th>FRI</th><th>SAT</th><th>SUN</th>
+    </tr></thead>
+    <tbody>
+
+    <tr>
+      <td class="wk-label"><span class="wk-num">Wk 1</span><span class="wk-dates">Jun 15</span></td>
+      <td><div class="day-cell swim" onclick="openModal(this)"
+        data-type="Swim" data-emoji="🏊" data-week="Week 1 · Mon Jun 16"
+        data-distance="1800m" data-sets="8×200m, 20s rest" data-effort="Aerobic / technique"
+        data-focus="Focus on stroke rate and pace consistency. Time a few 200s.">
+        <span class="cell-emoji">🏊</span><span class="cell-label">Swim</span><span class="cell-dist">1800m</span>
+      </div></td>
+      <td><div class="day-cell bike" onclick="openModal(this)"
+        data-type="Bike" data-emoji="🚴" data-week="Week 1 · Tue Jun 17"
+        data-distance="~22km" data-duration="60 min" data-effort="Easy endurance"
+        data-focus="Get comfortable outdoors. Flat or rolling route. No pressure on pace.">
+        <span class="cell-emoji">🚴</span><span class="cell-label">Bike</span><span class="cell-dist">60 min</span>
+      </div></td>
+      <td><div class="day-cell run" onclick="openModal(this)"
+        data-type="Run" data-emoji="🏃" data-week="Week 1 · Wed Jun 18"
+        data-distance="5km" data-effort="Easy aerobic"
+        data-focus="Conversational pace. Monitor the left foot — back off if any heel flare.">
+        <span class="cell-emoji">🏃</span><span class="cell-label">Run</span><span class="cell-dist">5km</span>
+      </div></td>
+      <td><div class="day-cell swim" onclick="openModal(this)"
+        data-type="Swim" data-emoji="🏊" data-week="Week 1 · Thu Jun 19"
+        data-distance="2000m" data-sets="6×250m, 30s rest" data-effort="Steady pace"
+        data-focus="Build endurance base. Don't sprint. Aim for even splits.">
+        <span class="cell-emoji">🏊</span><span class="cell-label">Swim</span><span class="cell-dist">2000m</span>
+      </div></td>
+      <td><div class="day-cell rest"><span class="cell-emoji">😴</span><span class="cell-label">Rest</span></div></td>
+      <td><div class="day-cell brick" onclick="openModal(this)"
+        data-type="Brick" data-emoji="🧱" data-week="Week 1 · Sat Jun 21"
+        data-distance="Bike 18km + Run 3km" data-duration="45 min bike + 20 min run" data-effort="Moderate"
+        data-focus="Practice T2 transition. The first few minutes of the run will feel like bricks on your legs — that's normal.">
+        <span class="cell-emoji">🧱</span><span class="cell-label">Brick</span><span class="cell-dist">45+20</span>
+      </div></td>
+      <td><div class="day-cell run" onclick="openModal(this)"
+        data-type="Long Run" data-emoji="🏃" data-week="Week 1 · Sun Jun 22"
+        data-distance="7km" data-effort="Easy / conversational"
+        data-focus="Long and slow. This is aerobic base work, not a time trial.">
+        <span class="cell-emoji">🏃</span><span class="cell-label">Long Run</span><span class="cell-dist">7km</span>
+      </div></td>
+    </tr>
+
+    <tr>
+      <td class="wk-label"><span class="wk-num">Wk 2</span><span class="wk-dates">Jun 22</span></td>
+      <td><div class="day-cell swim" onclick="openModal(this)"
+        data-type="Swim" data-emoji="🏊" data-week="Week 2 · Mon Jun 23"
+        data-distance="1900m" data-sets="8×200m + 3×100m fast" data-effort="Aerobic + speed"
+        data-focus="After the 200s, the 100s should be noticeably faster. Goal: feel the difference between cruise and push pace.">
+        <span class="cell-emoji">🏊</span><span class="cell-label">Swim</span><span class="cell-dist">1900m</span>
+      </div></td>
+      <td><div class="day-cell bike" onclick="openModal(this)"
+        data-type="Bike" data-emoji="🚴" data-week="Week 2 · Tue Jun 24"
+        data-distance="~25km" data-duration="65 min" data-effort="Steady endurance"
+        data-focus="Introduce some rolling terrain if available. Keep cadence up on climbs.">
+        <span class="cell-emoji">🚴</span><span class="cell-label">Bike</span><span class="cell-dist">65 min</span>
+      </div></td>
+      <td><div class="day-cell run" onclick="openModal(this)"
+        data-type="Run" data-emoji="🏃" data-week="Week 2 · Wed Jun 25"
+        data-distance="5km" data-effort="Easy aerobic"
+        data-focus="Recovery run. Easy effort throughout.">
+        <span class="cell-emoji">🏃</span><span class="cell-label">Run</span><span class="cell-dist">5km</span>
+      </div></td>
+      <td><div class="day-cell swim" onclick="openModal(this)"
+        data-type="Swim" data-emoji="🏊" data-week="Week 2 · Thu Jun 26"
+        data-distance="2100m" data-sets="5×300m, 30s rest" data-effort="Steady"
+        data-focus="Longer intervals than last week. Keep technique clean as you fatigue.">
+        <span class="cell-emoji">🏊</span><span class="cell-label">Swim</span><span class="cell-dist">2100m</span>
+      </div></td>
+      <td><div class="day-cell rest"><span class="cell-emoji">😴</span><span class="cell-label">Rest</span></div></td>
+      <td><div class="day-cell brick" onclick="openModal(this)"
+        data-type="Brick" data-emoji="🧱" data-week="Week 2 · Sat Jun 28"
+        data-distance="Bike 20km + Run 3.5km" data-duration="50 min bike + 20 min run" data-effort="Moderate"
+        data-focus="Slightly longer than last week. Still focus on smooth T2 transition and getting running legs faster.">
+        <span class="cell-emoji">🧱</span><span class="cell-label">Brick</span><span class="cell-dist">50+20</span>
+      </div></td>
+      <td><div class="day-cell run" onclick="openModal(this)"
+        data-type="Long Run" data-emoji="🏃" data-week="Week 2 · Sun Jun 29"
+        data-distance="7.5km" data-effort="Easy / conversational"
+        data-focus="Build on last Sunday. Slow and steady.">
+        <span class="cell-emoji">🏃</span><span class="cell-label">Long Run</span><span class="cell-dist">7.5km</span>
+      </div></td>
+    </tr>
+
+    <tr>
+      <td class="wk-label"><span class="wk-num">Wk 3</span><span class="wk-dates">Jun 29</span></td>
+      <td><div class="day-cell swim" onclick="openModal(this)"
+        data-type="Swim" data-emoji="🏊" data-week="Week 3 · Mon Jun 30"
+        data-distance="2000m" data-sets="4×400m, 45s rest" data-effort="Race pace"
+        data-milestone="⚑ Time your 400s — target &lt;2:35/100m average"
+        data-focus="This is your pace check. Write down your splits. You want to be around 10:20 per 400m or faster.">
+        <span class="cell-emoji">🏊</span><span class="cell-label">Swim</span><span class="cell-dist">2000m</span>
+        <div class="milestone-dot"></div>
+      </div></td>
+      <td><div class="day-cell bike" onclick="openModal(this)"
+        data-type="Bike" data-emoji="🚴" data-week="Week 3 · Tue Jul 1"
+        data-distance="~27km" data-duration="70 min" data-effort="Steady"
+        data-focus="Comfortable effort. Get used to being in the saddle for longer stretches.">
+        <span class="cell-emoji">🚴</span><span class="cell-label">Bike</span><span class="cell-dist">70 min</span>
+      </div></td>
+      <td><div class="day-cell run" onclick="openModal(this)"
+        data-type="Run" data-emoji="🏃" data-week="Week 3 · Wed Jul 2"
+        data-distance="6km" data-effort="Easy + 1km tempo"
+        data-focus="5km easy, last 1km at a comfortably hard effort. First hint of race-pace running.">
+        <span class="cell-emoji">🏃</span><span class="cell-label">Run</span><span class="cell-dist">6km</span>
+      </div></td>
+      <td><div class="day-cell swim" onclick="openModal(this)"
+        data-type="Swim" data-emoji="🏊" data-week="Week 3 · Thu Jul 3"
+        data-distance="2200m" data-sets="2×800m + 2×200m" data-effort="Mixed"
+        data-focus="The 800s build your sustained pace. The 200s at the end should be fast — flush the legs.">
+        <span class="cell-emoji">🏊</span><span class="cell-label">Swim</span><span class="cell-dist">2200m</span>
+      </div></td>
+      <td><div class="day-cell rest"><span class="cell-emoji">😴</span><span class="cell-label">Rest</span></div></td>
+      <td><div class="day-cell brick" onclick="openModal(this)"
+        data-type="Brick" data-emoji="🧱" data-week="Week 3 · Sat Jul 5"
+        data-distance="Bike 22km + Run 3.5km" data-duration="55 min bike + 22 min run" data-effort="Moderate"
+        data-focus="Keep ratcheting up the brick duration. Transition time should be tightening up by now.">
+        <span class="cell-emoji">🧱</span><span class="cell-label">Brick</span><span class="cell-dist">55+22</span>
+      </div></td>
+      <td><div class="day-cell run" onclick="openModal(this)"
+        data-type="Long Run" data-emoji="🏃" data-week="Week 3 · Sun Jul 6"
+        data-distance="8km" data-effort="Easy / conversational"
+        data-focus="End of Phase 1. You should feel noticeably more comfortable in all three sports than week 1.">
+        <span class="cell-emoji">🏃</span><span class="cell-label">Long Run</span><span class="cell-dist">8km</span>
+      </div></td>
+    </tr>
+
+    </tbody>
+  </table>
+</div>
+
+<!-- ═══════════════ PHASE 2 ═══════════════ -->
+<div class="phase-block">
+  <div class="phase-header" style="color:var(--phase2)">
+    <span class="phase-label" style="background:var(--phase2)">Phase 2</span>
+    <span class="phase-title">Build</span>
+    <span class="phase-desc">Weeks 4–6 · Jul 6–26 · Longer bricks, bike intensity, first 1500m straight through</span>
+  </div>
+  <table class="week-table">
+    <thead><tr>
+      <th></th><th>MON</th><th>TUE</th><th>WED</th><th>THU</th><th>FRI</th><th>SAT</th><th>SUN</th>
+    </tr></thead>
+    <tbody>
+
+    <tr>
+      <td class="wk-label"><span class="wk-num">Wk 4</span><span class="wk-dates">Jul 6</span></td>
+      <td><div class="day-cell swim" onclick="openModal(this)"
+        data-type="Swim" data-emoji="🏊" data-week="Week 4 · Mon Jul 7"
+        data-distance="2200m" data-sets="6×300m + 4×100m" data-effort="Aerobic + speed"
+        data-focus="300s at a strong cruise pace, 100s faster. Builds both endurance and turn-over.">
+        <span class="cell-emoji">🏊</span><span class="cell-label">Swim</span><span class="cell-dist">2200m</span>
+      </div></td>
+      <td><div class="day-cell bike" onclick="openModal(this)"
+        data-type="Bike" data-emoji="🚴" data-week="Week 4 · Tue Jul 8"
+        data-distance="~28km" data-duration="75 min" data-effort="Endurance + 3×8 min tempo"
+        data-focus="After a 20 min warmup, do 3 efforts of 8 min at a hard but sustainable pace. 5 min easy between each. First real intensity on the bike.">
+        <span class="cell-emoji">🚴</span><span class="cell-label">Bike</span><span class="cell-dist">75 min</span>
+      </div></td>
+      <td><div class="day-cell run" onclick="openModal(this)"
+        data-type="Run" data-emoji="🏃" data-week="Week 4 · Wed Jul 9"
+        data-distance="5km + strides" data-effort="Easy + strides"
+        data-focus="4km easy, then 4×20 second strides (fast but relaxed) with 60s walk recovery. Strides keep your run legs sharp without adding stress.">
+        <span class="cell-emoji">🏃</span><span class="cell-label">Run</span><span class="cell-dist">5km</span>
+      </div></td>
+      <td><div class="day-cell swim" onclick="openModal(this)"
+        data-type="Swim" data-emoji="🏊" data-week="Week 4 · Thu Jul 10"
+        data-distance="2200m" data-sets="1×1000m + sets" data-effort="Endurance"
+        data-milestone="First long continuous swim — note your 1000m time"
+        data-focus="Start with 1×1000m straight through — write down your time. Finish with shorter sets. This is your first big continuous swim.">
+        <span class="cell-emoji">🏊</span><span class="cell-label">Swim</span><span class="cell-dist">2200m</span>
+        <div class="milestone-dot"></div>
+      </div></td>
+      <td><div class="day-cell rest"><span class="cell-emoji">😴</span><span class="cell-label">Rest</span></div></td>
+      <td><div class="day-cell brick" onclick="openModal(this)"
+        data-type="Brick" data-emoji="🧱" data-week="Week 4 · Sat Jul 12"
+        data-distance="Bike 24km + Run 4km" data-duration="60 min bike + 25 min run" data-effort="Moderate-strong"
+        data-focus="The run should feel harder to start than a standalone run — that's the point. Push through the first 5 minutes.">
+        <span class="cell-emoji">🧱</span><span class="cell-label">Brick</span><span class="cell-dist">60+25</span>
+      </div></td>
+      <td><div class="day-cell run" onclick="openModal(this)"
+        data-type="Long Run" data-emoji="🏃" data-week="Week 4 · Sun Jul 13"
+        data-distance="8.5km" data-effort="Easy"
+        data-focus="Easy long effort. Don't make up for anything here — just log the miles.">
+        <span class="cell-emoji">🏃</span><span class="cell-label">Long Run</span><span class="cell-dist">8.5km</span>
+      </div></td>
+    </tr>
+
+    <tr>
+      <td class="wk-label"><span class="wk-num">Wk 5</span><span class="wk-dates">Jul 13</span></td>
+      <td><div class="day-cell swim" onclick="openModal(this)"
+        data-type="Swim" data-emoji="🏊" data-week="Week 5 · Mon Jul 14"
+        data-distance="2300m" data-sets="3×500m, 45s rest" data-effort="Threshold"
+        data-focus="500m is long enough to need real pacing. Don't go out too hard. Aim for negative splits — second half faster than first.">
+        <span class="cell-emoji">🏊</span><span class="cell-label">Swim</span><span class="cell-dist">2300m</span>
+      </div></td>
+      <td><div class="day-cell bike" onclick="openModal(this)"
+        data-type="Bike" data-emoji="🚴" data-week="Week 5 · Tue Jul 15"
+        data-distance="~30km" data-duration="80 min" data-effort="Endurance + 3×10 min tempo"
+        data-focus="Bump tempo intervals from 8→10 min. Keep the effort hard but controlled — you should be able to speak in short sentences, nothing more.">
+        <span class="cell-emoji">🚴</span><span class="cell-label">Bike</span><span class="cell-dist">80 min</span>
+      </div></td>
+      <td><div class="day-cell run" onclick="openModal(this)"
+        data-type="Run" data-emoji="🏃" data-week="Week 5 · Wed Jul 16"
+        data-distance="6km" data-effort="Easy + 2km tempo"
+        data-focus="4km easy, last 2km at a comfortably hard effort (~10k race pace). Building toward race run feel.">
+        <span class="cell-emoji">🏃</span><span class="cell-label">Run</span><span class="cell-dist">6km</span>
+      </div></td>
+      <td><div class="day-cell swim" onclick="openModal(this)"
+        data-type="Swim" data-emoji="🏊" data-week="Week 5 · Thu Jul 17"
+        data-distance="2400m" data-sets="1×1500m straight through" data-effort="Race effort"
+        data-milestone="⚑ First 1500m continuous — this is race distance. Note your time."
+        data-focus="This is the big one. Swim 1500m straight through at your goal race pace. Write down your time. You want to see sub-42 min here ideally sub-38.">
+        <span class="cell-emoji">🏊</span><span class="cell-label">Swim</span><span class="cell-dist">2400m</span>
+        <div class="milestone-dot"></div>
+      </div></td>
+      <td><div class="day-cell rest"><span class="cell-emoji">😴</span><span class="cell-label">Rest</span></div></td>
+      <td><div class="day-cell brick" onclick="openModal(this)"
+        data-type="Brick" data-emoji="🧱" data-week="Week 5 · Sat Jul 19"
+        data-distance="Bike 25km + Run 4.5km" data-duration="65 min bike + 28 min run" data-effort="Moderate-strong"
+        data-focus="Pushing both legs of the brick further. The run after bike should be getting more comfortable by now.">
+        <span class="cell-emoji">🧱</span><span class="cell-label">Brick</span><span class="cell-dist">65+28</span>
+      </div></td>
+      <td><div class="day-cell run" onclick="openModal(this)"
+        data-type="Long Run" data-emoji="🏃" data-week="Week 5 · Sun Jul 20"
+        data-distance="9km" data-effort="Easy"
+        data-focus="Nothing fancy. Long and easy. Hydrate well the day before.">
+        <span class="cell-emoji">🏃</span><span class="cell-label">Long Run</span><span class="cell-dist">9km</span>
+      </div></td>
+    </tr>
+
+    <tr>
+      <td class="wk-label"><span class="wk-num">Wk 6</span><span class="wk-dates">Jul 20</span></td>
+      <td><div class="day-cell swim" onclick="openModal(this)"
+        data-type="Swim" data-emoji="🏊" data-week="Week 6 · Mon Jul 21"
+        data-distance="2400m" data-sets="Threshold sets" data-effort="Strong"
+        data-focus="Mix of 400s and 200s at threshold. You should be noticeably faster than week 1 at this point.">
+        <span class="cell-emoji">🏊</span><span class="cell-label">Swim</span><span class="cell-dist">2400m</span>
+      </div></td>
+      <td><div class="day-cell bike" onclick="openModal(this)"
+        data-type="Bike" data-emoji="🚴" data-week="Week 6 · Tue Jul 22"
+        data-distance="~35km" data-duration="85 min" data-effort="Long steady"
+        data-milestone="⚑ First ~35km outdoor ride — close to race distance"
+        data-focus="Hold a strong, steady pace for most of this. This is the closest you've been to race bike distance. How do your legs feel at the end?">
+        <span class="cell-emoji">🚴</span><span class="cell-label">Bike</span><span class="cell-dist">85 min</span>
+        <div class="milestone-dot"></div>
+      </div></td>
+      <td><div class="day-cell run" onclick="openModal(this)"
+        data-type="Run" data-emoji="🏃" data-week="Week 6 · Wed Jul 23"
+        data-distance="6km" data-effort="Easy recovery"
+        data-focus="After a big Tuesday bike, this run is purely recovery. Very easy effort.">
+        <span class="cell-emoji">🏃</span><span class="cell-label">Run</span><span class="cell-dist">6km</span>
+      </div></td>
+      <td><div class="day-cell swim" onclick="openModal(this)"
+        data-type="Swim" data-emoji="🏊" data-week="Week 6 · Thu Jul 24"
+        data-distance="2200m" data-sets="1×1500m + 4×100m" data-effort="Race pace + speed"
+        data-focus="Second 1500m straight through. Compare to Week 5. Should be same time or faster. The 100s at the end are fast finishers.">
+        <span class="cell-emoji">🏊</span><span class="cell-label">Swim</span><span class="cell-dist">2200m</span>
+      </div></td>
+      <td><div class="day-cell rest"><span class="cell-emoji">😴</span><span class="cell-label">Rest</span></div></td>
+      <td><div class="day-cell brick" onclick="openModal(this)"
+        data-type="Brick" data-emoji="🧱" data-week="Week 6 · Sat Jul 26"
+        data-distance="Bike 27km + Run 5km" data-duration="70 min bike + 30 min run" data-effort="Strong"
+        data-focus="First 5km run off the bike. This is the race run distance. Note how your legs feel at km 3 vs km 5.">
+        <span class="cell-emoji">🧱</span><span class="cell-label">Brick</span><span class="cell-dist">70+30</span>
+      </div></td>
+      <td><div class="day-cell run" onclick="openModal(this)"
+        data-type="Long Run" data-emoji="🏃" data-week="Week 6 · Sun Jul 27"
+        data-distance="9km" data-effort="Easy"
+        data-focus="Consistent easy long run. Phase 2 ends here — you've crossed race swim distance twice and done a 35km bike.">
+        <span class="cell-emoji">🏃</span><span class="cell-label">Long Run</span><span class="cell-dist">9km</span>
+      </div></td>
+    </tr>
+
+    </tbody>
+  </table>
+</div>
+
+<!-- ═══════════════ PHASE 3 ═══════════════ -->
+<div class="phase-block">
+  <div class="phase-header" style="color:var(--phase3)">
+    <span class="phase-label" style="background:var(--phase3)">Phase 3</span>
+    <span class="phase-title">Race-Specific</span>
+    <span class="phase-desc">Weeks 7–9 · Jul 27–Aug 16 · Full-distance bricks, peak volume, open-water swim</span>
+  </div>
+  <table class="week-table">
+    <thead><tr>
+      <th></th><th>MON</th><th>TUE</th><th>WED</th><th>THU</th><th>FRI</th><th>SAT</th><th>SUN</th>
+    </tr></thead>
+    <tbody>
+
+    <tr>
+      <td class="wk-label"><span class="wk-num">Wk 7</span><span class="wk-dates">Jul 27</span></td>
+      <td><div class="day-cell swim" onclick="openModal(this)"
+        data-type="Swim" data-emoji="🏊" data-week="Week 7 · Mon Jul 28"
+        data-distance="2400m" data-sets="Race-pace sets" data-effort="Race pace"
+        data-focus="Everything at or near your 1500m race pace. No junk yardage.">
+        <span class="cell-emoji">🏊</span><span class="cell-label">Swim</span><span class="cell-dist">2400m</span>
+      </div></td>
+      <td><div class="day-cell bike" onclick="openModal(this)"
+        data-type="Bike" data-emoji="🚴" data-week="Week 7 · Tue Jul 29"
+        data-distance="~32km" data-duration="85 min" data-effort="Race-effort intervals"
+        data-focus="2×15 min at race effort with 10 min recovery. Simulate the sustained push you'll need on race day.">
+        <span class="cell-emoji">🚴</span><span class="cell-label">Bike</span><span class="cell-dist">85 min</span>
+      </div></td>
+      <td><div class="day-cell run" onclick="openModal(this)"
+        data-type="Run" data-emoji="🏃" data-week="Week 7 · Wed Jul 30"
+        data-distance="6km" data-effort="Easy + 2km race pace"
+        data-focus="4km easy, last 2km at race pace. Your race pace should feel controlled, not desperate.">
+        <span class="cell-emoji">🏃</span><span class="cell-label">Run</span><span class="cell-dist">6km</span>
+      </div></td>
+      <td><div class="day-cell swim" onclick="openModal(this)"
+        data-type="Swim" data-emoji="🏊" data-week="Week 7 · Thu Jul 31"
+        data-distance="1800m" data-sets="Short, sharp sets" data-effort="Fast finishes"
+        data-focus="Quality over quantity. Short rest, fast 100s and 50s. Keep the legs turning over.">
+        <span class="cell-emoji">🏊</span><span class="cell-label">Swim</span><span class="cell-dist">1800m</span>
+      </div></td>
+      <td><div class="day-cell rest"><span class="cell-emoji">😴</span><span class="cell-label">Rest</span></div></td>
+      <td><div class="day-cell brick" onclick="openModal(this)"
+        data-type="Brick" data-emoji="🧱" data-week="Week 7 · Sat Aug 1"
+        data-distance="40km bike + 5km run" data-effort="Race simulation"
+        data-milestone="⚑ Race simulation #1 — full 40km bike + 5km run"
+        data-focus="First time at full bike race distance. Pace the bike like race day — don't blow up. The 5km run should feel hard but sustainable. Bring nutrition.">
+        <span class="cell-emoji">🧱</span><span class="cell-label">Full Brick</span><span class="cell-dist">40km+5k</span>
+        <div class="milestone-dot"></div>
+      </div></td>
+      <td><div class="day-cell run" onclick="openModal(this)"
+        data-type="Long Run" data-emoji="🏃" data-week="Week 7 · Sun Aug 2"
+        data-distance="9.5km" data-effort="Easy"
+        data-focus="The day after your first full brick. Legs will be heavy. Slow and easy — just move them.">
+        <span class="cell-emoji">🏃</span><span class="cell-label">Long Run</span><span class="cell-dist">9.5km</span>
+      </div></td>
+    </tr>
+
+    <tr>
+      <td class="wk-label"><span class="wk-num">Wk 8</span><span class="wk-dates">Aug 3</span></td>
+      <td><div class="day-cell swim" onclick="openModal(this)"
+        data-type="Swim" data-emoji="🏊" data-week="Week 8 · Mon Aug 4"
+        data-distance="2400m" data-sets="Race-pace sets" data-effort="Race pace"
+        data-focus="Another race-pace swim session. Consistency week over week is the goal.">
+        <span class="cell-emoji">🏊</span><span class="cell-label">Swim</span><span class="cell-dist">2400m</span>
+      </div></td>
+      <td><div class="day-cell bike" onclick="openModal(this)"
+        data-type="Bike" data-emoji="🚴" data-week="Week 8 · Tue Aug 5"
+        data-distance="~35km" data-duration="90 min" data-effort="Sustained"
+        data-focus="Longest bike session of the plan. Hold a strong pace across the full duration. Practice nutrition timing.">
+        <span class="cell-emoji">🚴</span><span class="cell-label">Bike</span><span class="cell-dist">90 min</span>
+      </div></td>
+      <td><div class="day-cell run" onclick="openModal(this)"
+        data-type="Run" data-emoji="🏃" data-week="Week 8 · Wed Aug 6"
+        data-distance="6km" data-effort="Easy + tempo middle 3km"
+        data-focus="Warm up 1.5km, 3km at tempo, 1.5km cool down. Solid mid-week run quality.">
+        <span class="cell-emoji">🏃</span><span class="cell-label">Run</span><span class="cell-dist">6km</span>
+      </div></td>
+      <td><div class="day-cell swim" onclick="openModal(this)"
+        data-type="Swim" data-emoji="🏊" data-week="Week 8 · Thu Aug 7"
+        data-distance="2000m" data-sets="Open water preferred" data-effort="Steady"
+        data-milestone="⚑ Open-water swim — Lake Michigan if possible"
+        data-focus="Pool pace ≠ open water pace. The sighting, chop, and no-walls experience matters. If you can get into Lake Michigan this week, do it. Wetsuit recommended.">
+        <span class="cell-emoji">🏊</span><span class="cell-label">Swim</span><span class="cell-dist">2000m</span>
+        <div class="milestone-dot"></div>
+      </div></td>
+      <td><div class="day-cell rest"><span class="cell-emoji">😴</span><span class="cell-label">Rest</span></div></td>
+      <td><div class="day-cell brick" onclick="openModal(this)"
+        data-type="Brick" data-emoji="🧱" data-week="Week 8 · Sat Aug 9"
+        data-distance="40km bike + 5km run" data-effort="Race simulation"
+        data-milestone="⚑ Race simulation #2 — practice T2, race nutrition"
+        data-focus="Second full-distance brick. Try to replicate race conditions as closely as possible — nutrition, pace, T2 timing. What felt wrong in #1? Fix it here.">
+        <span class="cell-emoji">🧱</span><span class="cell-label">Full Brick</span><span class="cell-dist">40km+5k</span>
+        <div class="milestone-dot"></div>
+      </div></td>
+      <td><div class="day-cell run" onclick="openModal(this)"
+        data-type="Long Run" data-emoji="🏃" data-week="Week 8 · Sun Aug 10"
+        data-distance="10km" data-effort="Easy"
+        data-focus="Peak long run. 10km easy. This is your best week — you should feel fit.">
+        <span class="cell-emoji">🏃</span><span class="cell-label">Long Run</span><span class="cell-dist">10km</span>
+      </div></td>
+    </tr>
+
+    <tr>
+      <td class="wk-label"><span class="wk-num">Wk 9</span><span class="wk-dates">Aug 10</span></td>
+      <td><div class="day-cell swim" onclick="openModal(this)"
+        data-type="Swim" data-emoji="🏊" data-week="Week 9 · Mon Aug 11"
+        data-distance="2400m" data-sets="Pace + endurance mix" data-effort="Race pace"
+        data-focus="Mix longer threshold sets with some fast 100s. Peak swim volume.">
+        <span class="cell-emoji">🏊</span><span class="cell-label">Swim</span><span class="cell-dist">2400m</span>
+      </div></td>
+      <td><div class="day-cell bike" onclick="openModal(this)"
+        data-type="Bike" data-emoji="🚴" data-week="Week 9 · Tue Aug 12"
+        data-distance="~32km" data-duration="85 min" data-effort="Race-effort intervals"
+        data-focus="Last hard bike session of the plan. Make it count — 2×15 min race effort.">
+        <span class="cell-emoji">🚴</span><span class="cell-label">Bike</span><span class="cell-dist">85 min</span>
+      </div></td>
+      <td><div class="day-cell run" onclick="openModal(this)"
+        data-type="Run" data-emoji="🏃" data-week="Week 9 · Wed Aug 13"
+        data-distance="6km" data-effort="Easy + 2km race pace"
+        data-focus="Last quality run session. Feel strong and controlled at race pace.">
+        <span class="cell-emoji">🏃</span><span class="cell-label">Run</span><span class="cell-dist">6km</span>
+      </div></td>
+      <td><div class="day-cell swim" onclick="openModal(this)"
+        data-type="Swim" data-emoji="🏊" data-week="Week 9 · Thu Aug 14"
+        data-distance="1800m" data-sets="Short + sharp" data-effort="Fast"
+        data-focus="Quality finisher session. Short rest, high quality. Don't grind here.">
+        <span class="cell-emoji">🏊</span><span class="cell-label">Swim</span><span class="cell-dist">1800m</span>
+      </div></td>
+      <td><div class="day-cell rest"><span class="cell-emoji">😴</span><span class="cell-label">Rest</span></div></td>
+      <td><div class="day-cell brick" onclick="openModal(this)"
+        data-type="Brick" data-emoji="🧱" data-week="Week 9 · Sat Aug 16"
+        data-distance="40km bike + 5km run" data-effort="Race simulation"
+        data-milestone="⚑ Race simulation #3 — final full dress rehearsal"
+        data-focus="Last full-distance brick. You should feel significantly more comfortable than #1. This is your confidence builder. Race gear, race nutrition, race pacing.">
+        <span class="cell-emoji">🧱</span><span class="cell-label">Full Brick</span><span class="cell-dist">40km+5k</span>
+        <div class="milestone-dot"></div>
+      </div></td>
+      <td><div class="day-cell run" onclick="openModal(this)"
+        data-type="Long Run" data-emoji="🏃" data-week="Week 9 · Sun Aug 17"
+        data-distance="10km" data-effort="Easy"
+        data-focus="Peak volume ends here. After today, everything goes down. Enjoy this run — it's the last big one.">
+        <span class="cell-emoji">🏃</span><span class="cell-label">Long Run</span><span class="cell-dist">10km</span>
+      </div></td>
+    </tr>
+
+    </tbody>
+  </table>
+</div>
+
+<!-- ═══════════════ PHASE 4 ═══════════════ -->
+<div class="phase-block">
+  <div class="phase-header" style="color:var(--phase4)">
+    <span class="phase-label" style="background:var(--phase4)">Phase 4</span>
+    <span class="phase-title">Taper + Race Week</span>
+    <span class="phase-desc">Weeks 10–11 · Aug 17–28 · Cut volume ~40%, keep sharpness, race Sunday Aug 28</span>
+  </div>
+  <table class="week-table">
+    <thead><tr>
+      <th></th><th>MON</th><th>TUE</th><th>WED</th><th>THU</th><th>FRI</th><th>SAT</th><th>SUN</th>
+    </tr></thead>
+    <tbody>
+
+    <tr>
+      <td class="wk-label"><span class="wk-num">Wk 10</span><span class="wk-dates">Aug 17</span></td>
+      <td><div class="day-cell swim" onclick="openModal(this)"
+        data-type="Swim" data-emoji="🏊" data-week="Week 10 · Mon Aug 18"
+        data-distance="1600m" data-sets="Race-pace sets" data-effort="Race pace"
+        data-focus="Volume is down, intensity stays. Everything at race pace. This is about feel, not fitness gains.">
+        <span class="cell-emoji">🏊</span><span class="cell-label">Swim</span><span class="cell-dist">1600m</span>
+      </div></td>
+      <td><div class="day-cell bike" onclick="openModal(this)"
+        data-type="Bike" data-emoji="🚴" data-week="Week 10 · Tue Aug 19"
+        data-distance="~22km" data-duration="60 min" data-effort="Moderate"
+        data-focus="Shorter and easier than peak weeks. Include a few 3-min surges at race effort to keep legs sharp.">
+        <span class="cell-emoji">🚴</span><span class="cell-label">Bike</span><span class="cell-dist">60 min</span>
+      </div></td>
+      <td><div class="day-cell run" onclick="openModal(this)"
+        data-type="Run" data-emoji="🏃" data-week="Week 10 · Wed Aug 20"
+        data-distance="5km" data-effort="Easy + 1km tempo"
+        data-focus="4km easy, 1km at race pace. Short and purposeful.">
+        <span class="cell-emoji">🏃</span><span class="cell-label">Run</span><span class="cell-dist">5km</span>
+      </div></td>
+      <td><div class="day-cell swim" onclick="openModal(this)"
+        data-type="Swim" data-emoji="🏊" data-week="Week 10 · Thu Aug 21"
+        data-distance="1600m" data-sets="Steady pace" data-effort="Comfortable"
+        data-focus="Easy, feel-good swim. No race-pace pressure. Just stay loose.">
+        <span class="cell-emoji">🏊</span><span class="cell-label">Swim</span><span class="cell-dist">1600m</span>
+      </div></td>
+      <td><div class="day-cell rest"><span class="cell-emoji">😴</span><span class="cell-label">Rest</span></div></td>
+      <td><div class="day-cell brick" onclick="openModal(this)"
+        data-type="Brick" data-emoji="🧱" data-week="Week 10 · Sat Aug 23"
+        data-distance="Bike ~14km + Run 3km" data-duration="35 min bike + 20 min run" data-effort="Controlled"
+        data-focus="Short and controlled. Just confirming your legs still know how to transition. Don't push.">
+        <span class="cell-emoji">🧱</span><span class="cell-label">Brick</span><span class="cell-dist">35+20</span>
+      </div></td>
+      <td><div class="day-cell run" onclick="openModal(this)"
+        data-type="Long Run" data-emoji="🏃" data-week="Week 10 · Sun Aug 24"
+        data-distance="7km" data-effort="Easy"
+        data-focus="You'll feel like you're undertraining. That's correct and intentional. The fitness is banked.">
+        <span class="cell-emoji">🏃</span><span class="cell-label">Run</span><span class="cell-dist">7km</span>
+      </div></td>
+    </tr>
+
+    <tr>
+      <td class="wk-label"><span class="wk-num">Wk 11</span><span class="wk-dates">Aug 24 🏁</span></td>
+      <td><div class="day-cell run" onclick="openModal(this)"
+        data-type="Run" data-emoji="🏃" data-week="Race Week · Mon Aug 24"
+        data-distance="~3km" data-duration="20 min easy" data-effort="Very easy"
+        data-focus="Shake out the legs. Nothing more. Don't 'check your fitness' — just move.">
+        <span class="cell-emoji">🏃</span><span class="cell-label">Run</span><span class="cell-dist">20 min</span>
+      </div></td>
+      <td><div class="day-cell swim" onclick="openModal(this)"
+        data-type="Swim" data-emoji="🏊" data-week="Race Week · Tue Aug 25"
+        data-distance="800m" data-effort="Very easy"
+        data-focus="Just feel the water. A few easy 100s. No effort, no intensity. Get out feeling good.">
+        <span class="cell-emoji">🏊</span><span class="cell-label">Swim</span><span class="cell-dist">800m</span>
+      </div></td>
+      <td><div class="day-cell bike" onclick="openModal(this)"
+        data-type="Bike" data-emoji="🚴" data-week="Race Week · Wed Aug 26"
+        data-distance="~6km" data-duration="20 min easy spin" data-effort="Very easy"
+        data-focus="Easy spin, check your gear is working, tires inflated, brakes good. This is a maintenance ride, not training.">
+        <span class="cell-emoji">🚴</span><span class="cell-label">Bike</span><span class="cell-dist">20 min</span>
+      </div></td>
+      <td><div class="day-cell rest"><span class="cell-emoji">😴</span><span class="cell-label">Rest</span></div></td>
+      <td><div class="day-cell rest" onclick="openModal(this)"
+        data-type="Rest" data-emoji="😴" data-week="Race Week · Fri Aug 27"
+        data-focus="Sleep 8+ hrs. Hydrate. Eat a normal, well-carbed dinner. Lay out all your gear tonight. No surprises tomorrow.">
+        <span class="cell-emoji">😴</span><span class="cell-label">Rest</span>
+      </div></td>
+      <td><div class="day-cell rest" onclick="openModal(this)"
+        data-type="Packet Pickup" data-emoji="📋" data-week="Race Week · Sat Aug 28"
+        data-focus="Packet pickup at Monroe Harbor. Rack your bike if allowed. Walk T1/T2. Check water temp. Sleep early.">
+        <span class="cell-emoji">📋</span><span class="cell-label">Packet</span>
+      </div></td>
+      <td><div class="day-cell race-day" onclick="openModal(this)"
+        data-type="RACE DAY" data-emoji="🏁" data-week="Sun Aug 28 — Monroe Harbor"
+        data-distance="1.5km Swim · 40km Bike · 10km Run"
+        data-focus="Start conservative on the swim, find your rhythm by 300m. Bike steady — don't chase people who'll blow up. Run your own pace out, build toward the finish. You've done the work.">
+        <span class="cell-emoji">🏁</span><span class="cell-label">Race Day</span><span class="cell-dist">Aug 28</span>
+      </div></td>
+    </tr>
+
+    </tbody>
+  </table>
+</div>
+
+<!-- MILESTONES -->
+<div class="milestones">
+  <h3>Key Milestones</h3>
+  <div class="milestone-item">Wk 3 Mon: Time your 400m splits — target sub-2:35/100m avg</div>
+  <div class="milestone-item">Wk 4 Thu: First 1000m continuous swim</div>
+  <div class="milestone-item">Wk 5 Thu: First 1500m straight through — note your time</div>
+  <div class="milestone-item">Wk 6 Tue: First ~35km outdoor bike ride</div>
+  <div class="milestone-item">Wk 7 Sat: Race simulation #1 — 40km bike + 5km run</div>
+  <div class="milestone-item">Wk 8 Thu: Open-water swim in Lake Michigan</div>
+  <div class="milestone-item">Wk 8 Sat: Race simulation #2 — dial in nutrition and T2</div>
+  <div class="milestone-item">Wk 9 Sat: Race simulation #3 — final dress rehearsal</div>
+  <div class="milestone-item">Wk 10: Taper starts — feeling undertrained is correct</div>
+  <div class="milestone-item">Race: Wetsuit legal and strongly recommended (68–74°F)</div>
+</div>
+
+</div><!-- /main -->
+
+<!-- ═══════════════ MODAL ═══════════════ -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModalOnOverlay(event)">
+  <div class="modal" id="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <div class="modal-emoji" id="modalEmoji"></div>
+      <div class="modal-title-block">
+        <div class="modal-type" id="modalType"></div>
+        <div class="modal-week" id="modalWeek"></div>
+      </div>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <button class="modal-close" onclick="closeModal()">Done</button>
+  </div>
+</div>
+
+<script>
+function openModal(el) {
+  const type = el.dataset.type || '';
+  const emoji = el.dataset.emoji || '';
+  const week = el.dataset.week || '';
+  const distance = el.dataset.distance || '';
+  const duration = el.dataset.duration || '';
+  const sets = el.dataset.sets || '';
+  const effort = el.dataset.effort || '';
+  const focus = el.dataset.focus || '';
+  const milestone = el.dataset.milestone || '';
+
+  document.getElementById('modalEmoji').textContent = emoji;
+  document.getElementById('modalType').textContent = type;
+  document.getElementById('modalWeek').textContent = week;
+
+  let body = '';
+  if (distance) body += `<div class="modal-row"><span class="modal-row-label">Distance</span><span class="modal-row-val">${distance}</span></div>`;
+  if (duration) body += `<div class="modal-row"><span class="modal-row-label">Duration</span><span class="modal-row-val">${duration}</span></div>`;
+  if (sets) body += `<div class="modal-row"><span class="modal-row-label">Sets</span><span class="modal-row-val">${sets}</span></div>`;
+  if (effort) body += `<div class="modal-row"><span class="modal-row-label">Effort</span><span class="modal-row-val">${effort}</span></div>`;
+  if (focus) body += `<div class="modal-note">${focus}</div>`;
+  if (milestone) body += `<div class="modal-milestone">${milestone}</div>`;
+
+  document.getElementById('modalBody').innerHTML = body;
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function closeModalOnOverlay(e) {
+  if (e.target === document.getElementById('modalOverlay')) closeModal();
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+</script>
+
+</body>
+</html>
