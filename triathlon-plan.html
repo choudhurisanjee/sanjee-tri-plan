@@ -137,6 +137,14 @@
   }
   .day-cell:active { opacity: 0.75; transform: scale(0.95); }
 
+  /* logged workout marker — a small check in the corner */
+  .day-cell.logged::after {
+    content: '✓';
+    position: absolute; top: 2px; right: 4px;
+    font-size: 10px; font-weight: 700; line-height: 1;
+    color: var(--run-border);
+  }
+
   .day-cell.swim   { background: var(--swim-bg);  border-top-color: var(--swim-border); }
   .day-cell.bike   { background: var(--bike-bg);  border-top-color: var(--bike-border); }
   .day-cell.run    { background: var(--run-bg);   border-top-color: var(--run-border); }
@@ -240,6 +248,26 @@
     margin-top: 10px; padding: 10px 14px;
     background: #ffeeed; border-left: 3px solid var(--race);
     border-radius: 4px; font-size: 13px; color: var(--race); font-weight: 500;
+  }
+
+  /* ── YOUR LOG (actual results + notes) ── */
+  .modal-log {
+    margin-bottom: 14px; padding: 12px 14px;
+    background: #e9f4ee; border-left: 3px solid var(--run-border);
+    border-radius: 4px;
+  }
+  .modal-log h4 {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px; font-weight: 500;
+    text-transform: uppercase; letter-spacing: 1px;
+    color: var(--run-text); margin-bottom: 8px;
+  }
+  .modal-log-time {
+    font-size: 16px; font-weight: 600; color: var(--run-text);
+  }
+  .modal-log-notes {
+    margin-top: 6px; font-size: 13px; color: #355;
+    line-height: 1.45; white-space: pre-wrap;
   }
 
   .modal-close {
@@ -872,12 +900,20 @@ function openModal(el) {
   const effort = el.dataset.effort || '';
   const focus = el.dataset.focus || '';
   const milestone = el.dataset.milestone || '';
+  const logTime = el.dataset.logTime || '';
+  const logNotes = el.dataset.logNotes || '';
 
   document.getElementById('modalEmoji').textContent = emoji;
   document.getElementById('modalType').textContent = type;
   document.getElementById('modalWeek').textContent = week;
 
   let body = '';
+  if (logTime || logNotes) {
+    body += '<div class="modal-log"><h4>Your Log</h4>';
+    if (logTime) body += `<div class="modal-log-time">${logTime}</div>`;
+    if (logNotes) body += `<div class="modal-log-notes">${logNotes}</div>`;
+    body += '</div>';
+  }
   if (distance) body += `<div class="modal-row"><span class="modal-row-label">Distance</span><span class="modal-row-val">${distance}</span></div>`;
   if (duration) body += `<div class="modal-row"><span class="modal-row-label">Duration</span><span class="modal-row-val">${duration}</span></div>`;
   if (sets) body += `<div class="modal-row"><span class="modal-row-label">Sets</span><span class="modal-row-val">${sets}</span></div>`;
@@ -900,6 +936,11 @@ function closeModalOnOverlay(e) {
 }
 
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+// Mark any day cell that has a logged result/note so it's visible at a glance.
+document.querySelectorAll('.day-cell').forEach(cell => {
+  if (cell.dataset.logTime || cell.dataset.logNotes) cell.classList.add('logged');
+});
 </script>
 
 </body>
