@@ -3,8 +3,7 @@ pages:
   image: alpine:latest
   script:
     - mkdir -p public
-    - cp triathlon-plan.html public/index.html
-    - cp triathlon-plan.html public/triathlon-plan.html
+    - cp index.html public/index.html
   artifacts:
     paths:
       - public
